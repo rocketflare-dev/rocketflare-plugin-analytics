@@ -1,7 +1,7 @@
 {
   "id": "analytics",
   "label": "Analytics",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repo": "https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git",
   "anchor": "apps/web/src/plugins/analytics/plugin.json",
   "paths": [
@@ -39,6 +39,20 @@
   "apiPrefixes": [
     "/cubejs-api",
     "/mcp"
+  ],
+  "coreEdits": [
+    {
+      "file": "apps/web/vite.config.ts",
+      "after": "'/ws': proxyTo(",
+      "lines": ["'/cubejs-api': proxyTo(),", "'/mcp': proxyTo(),"]
+    },
+    {
+      "file": "apps/web/vite.config.ts",
+      "after": "'@': path.resolve(",
+      "lines": [
+        "'@nivo/heatmap': path.resolve(__dirname, './src/plugins/analytics/ui/lib/nivo-heatmap.tsx'),"
+      ]
+    }
   ],
   "vars": [],
   "workerExports": [],

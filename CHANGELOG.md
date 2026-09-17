@@ -5,6 +5,11 @@ live in `docs/upgrades/<version>.md`; this file is the index. `pnpm plugin upgra
 host app reads those notes and walks the `previous` chain, so a release with no note is a permanent
 gap every copy has to step over.
 
+## 1.0.1 — 2026-09-17
+
+**Installing this plugin no longer leaves the host unable to build.**
+[Porting note](docs/upgrades/1.0.1.md).
+
 ## 1.0.0 — 2026-09-17
 
 The first release: analytics as a plugin. Dashboards (`analytics_pages`), four tenant-scoped cubes

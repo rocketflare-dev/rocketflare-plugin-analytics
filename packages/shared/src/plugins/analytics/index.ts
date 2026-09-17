@@ -73,7 +73,7 @@ export * from './contracts'
 export const analyticsShared = {
   id: ANALYTICS_PLUGIN_ID,
   label: 'Analytics',
-  version: '1.0.0',
+  version: '1.0.1',
   subjects: [DASHBOARD_SUBJECT, ANALYTICS_SUBJECT],
   jobs: [
     z.object({

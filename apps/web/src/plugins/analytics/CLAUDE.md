@@ -4,7 +4,7 @@ Dashboards, the semantic layer, the drizzle-cube API and one example fact table.
 §8 until 0.6.0; it is now a plugin, and the kit knows nothing about drizzle-cube.
 `docs/CONCEPTS.md` §8 is the pointer, this directory is the reference.
 
-Install: `pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.0 --apply`
+Install: `pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.1 --apply`
 — it is in `.rocketflare.json` `defaultPlugins`, so `bash scripts/bootstrap.sh` installs it for you.
 
 ## The four published entries, and nothing else
@@ -60,7 +60,7 @@ the list:
 - `apps/web/vite.config.ts`: `/cubejs-api` and `/mcp` in the dev proxy, `'@nivo/heatmap'` aliased to
   `./src/plugins/analytics/ui/lib/nivo-heatmap.tsx` (drizzle-cube's heat-map chunk names that
   optional peer and Rollup fails without it), and `'recharts'` in `dedupe`.
-- `pnpm db:generate --name plugin-analytics-1.0.0`, then `pnpm db:migrate`.
+- `pnpm db:generate --name plugin-analytics-1.0.1`, then `pnpm db:migrate`.
 
 ## Things that moved and are not coming back
 

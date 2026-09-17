@@ -232,6 +232,74 @@ export function removeBarrelLine(text, kind, id) {
   return next
 }
 
+/**
+ * A plugin's edits to a CORE file, applied and reversed (D31, decision 12's sibling).
+ *
+ * A plugin owns four directories and edits no core file — that rule is what lets two plugins share
+ * one app. But some need a line in one: the analytics plugin cannot render at all unless
+ * `apps/web/vite.config.ts` aliases `@nivo/heatmap` to the stub it ships, because drizzle-cube's
+ * heat-map chunk names that OPTIONAL peer and Rollup fails the whole build without it.
+ *
+ * Printing the line as a "by hand" step left `pnpm build` failing for anyone who did not read the
+ * plan — including `plugin-ci.yml`, which runs the gate unattended and applies nothing. So a
+ * plugin DECLARES the edit and the host writes it, exactly as `bindings[]` declares a resource
+ * that `provision cloudflare` writes: the plugin still edits nothing, and the host still owns
+ * every byte of its own files.
+ *
+ * An edit is `{ file, after, lines }` — insert `lines` on the line following the first occurrence
+ * of `after`, at that anchor's indentation. Anchored rather than positional because a core file
+ * moves underneath a plugin between kit releases, and a line number would silently land in the
+ * wrong block.
+ *
+ * Idempotent (a line already present is left alone), and `revertCoreEdits` is its exact inverse,
+ * so add → remove returns the original bytes. A missing anchor THROWS with the file and the text
+ * it looked for: silently skipping it produces a build failure somewhere else entirely, which is
+ * the failure mode this whole function exists to remove.
+ */
+export function applyCoreEdits(text, edits) {
+  let next = text
+  for (const edit of edits) {
+    const anchorIndex = next.split('\n').findIndex(l => l.includes(edit.after))
+    if (anchorIndex === -1) {
+      throw new Error(
+        `core edit for ${edit.file}: no line contains ${JSON.stringify(edit.after)} — ` +
+          'the anchor moved, so the kit and the plugin disagree about this file'
+      )
+    }
+    const lines = next.split('\n')
+    const indent = lines[anchorIndex].match(/^\s*/)[0]
+    const missing = edit.lines.filter(l => !lines.some(existing => existing.trim() === l.trim()))
+    if (missing.length === 0) continue
+    lines.splice(anchorIndex + 1, 0, ...missing.map(l => `${indent}${l}`))
+    next = lines.join('\n')
+  }
+  return next
+}
+
+/** The exact inverse of `applyCoreEdits`: a round trip returns the original bytes. */
+export function revertCoreEdits(text, edits) {
+  let next = text
+  for (const edit of edits) {
+    for (const line of edit.lines) {
+      next = next
+        .split('\n')
+        .filter(existing => existing.trim() !== line.trim())
+        .join('\n')
+    }
+  }
+  return next
+}
+
+/** Every core edit a manifest declares, grouped by the file it touches. */
+export function coreEditsByFile(manifest) {
+  const byFile = new Map()
+  for (const edit of manifest.coreEdits ?? []) {
+    if (!byFile.has(edit.file)) byFile.set(edit.file, [])
+    byFile.get(edit.file).push(edit)
+  }
+  return byFile
+}
+
 const dropLine = (text, line) =>
   text
     .split('\n')
@@ -292,7 +360,15 @@ const REPO_ONLY = [
   'pnpm-lock.yaml',
   'biome.json',
 ]
-const REPO_ONLY_DIRS = ['.github/', '.git/', 'node_modules/', '.claude/']
+/**
+ * `scripts/` is on this list because a plugin repository needs the kit's `release.mjs` and the four
+ * `lib/*.mjs` it imports in order to cut a release at all (there is no `pnpm plugin:release`; the
+ * skill tells an author to copy them in). They are the plugin repo's OWN tooling in exactly the
+ * sense `.github/` is — and without this entry the first real plugin was refused at install for
+ * carrying the very files the kit told it to carry, which is how this was found (D31, Phase C).
+ * Nothing under here is ever copied into a host, where `scripts/` is the kit's.
+ */
+const REPO_ONLY_DIRS = ['.github/', '.git/', 'node_modules/', '.claude/', 'scripts/']
 
 /**
  * What `add` does with one repo-relative path of a plugin's tree.
@@ -446,7 +522,17 @@ export function buildPluginSurface(manifest, { repo, subdir = '', commit = null,
     kind: 'plugin',
     label: manifest.label ?? id,
     anchor: manifest.anchor ?? `apps/web/src/plugins/${id}/plugin.json`,
-    paths: manifest.paths ?? pluginRoots(id).map(r => `${r}**`),
+    // `docs/plugins/<id>/**` is always included, declared or not: `add` copies the plugin's release
+    // notes there, and if the surface did not name them `kit-manifest.test.ts` would report them as
+    // unclassified files and `remove` would leave them behind. A plugin's own `paths` name its CODE
+    // trees, which is what an author thinks about — the notes are the host's doing, so the host
+    // adds them (D31, found in Phase C the first time a plugin shipped notes).
+    paths: [
+      ...new Set([
+        ...(manifest.paths ?? pluginRoots(id).map(r => `${r}**`)),
+        `docs/plugins/${id}/**`,
+      ]),
+    ],
     registries: manifest.registries ?? Object.values(BARRELS).map(b => b.file),
     source: { repo, subdir, version: manifest.version ?? null, commit },
     installedAt: at,
@@ -542,6 +628,14 @@ export function renderAddPlan(plan) {
         .map(([n, v]) => `${n}@${v}`)
         .join(' ')}`
     )
+  }
+
+  const declaredEdits = m.coreEdits ?? []
+  if (declaredEdits.length > 0) {
+    lines.push('', 'Core files (applied for you — a plugin may not edit these itself)')
+    for (const [file, edits] of coreEditsByFile(m)) {
+      lines.push(`  ${pad(file, 44)}${edits.flatMap(e => e.lines).length} line(s)`)
+    }
   }
 
   lines.push('', 'Then, by hand — nothing below is done for you')

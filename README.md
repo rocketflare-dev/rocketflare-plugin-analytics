@@ -8,16 +8,16 @@ translated into your app's own vocabulary on the way in. The price is that an up
 rather than a version bump, which the kit's tooling already knows how to do.
 
 ```bash
-pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.1          # read the plan
-pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.1 --apply  # then install
-pnpm db:generate --name plugin-analytics-1.0.1 && pnpm db:migrate
+pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.2          # read the plan
+pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git@1.0.2 --apply  # then install
+pnpm db:generate --name plugin-analytics-1.0.2 && pnpm db:migrate
 ```
 
 A fresh kit installs it for you: it is in the kit's `.rocketflare.json` `defaultPlugins`, so
 `bash scripts/bootstrap.sh` does the above as its `plugins` step. `pnpm bootstrap --no-plugins`
 skips it, and `pnpm plugin remove analytics --apply` takes it back out.
 
-**Requires kit `>=0.6.0 <1.0.0`.** Kit 0.6.0 is where analytics stopped being core.
+**Requires kit `>=0.6.1 <1.0.0`.** Kit 0.6.0 is where analytics stopped being core.
 
 ## What it adds
 

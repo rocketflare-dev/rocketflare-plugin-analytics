@@ -5,6 +5,11 @@ live in `docs/upgrades/<version>.md`; this file is the index. `pnpm plugin upgra
 host app reads those notes and walks the `previous` chain, so a release with no note is a permanent
 gap every copy has to step over.
 
+## 1.0.2 — 2026-09-17
+
+**The floor moves to kit 0.6.1, because 0.6.0 could never host this plugin with a green gate.**
+[Porting note](docs/upgrades/1.0.2.md).
+
 ## 1.0.1 — 2026-09-17
 
 **Installing this plugin no longer leaves the host unable to build.**

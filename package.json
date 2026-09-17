@@ -1,6 +1,6 @@
 {
   "name": "rocketflare-plugin-analytics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Dashboards, cubes, fact tables and the drizzle-cube API for a Rocketflare app — installed as a plugin, not from npm.",
   "type": "module",

@@ -1,6 +1,6 @@
 ---
 version: unreleased
-previous: 1.0.1
+previous: 1.0.2
 date: null
 breaking: false
 migrations: []

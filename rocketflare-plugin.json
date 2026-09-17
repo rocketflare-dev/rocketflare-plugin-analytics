@@ -1,7 +1,7 @@
 {
   "id": "analytics",
   "label": "Analytics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repo": "https://github.com/rocketflare-dev/rocketflare-plugin-analytics.git",
   "anchor": "apps/web/src/plugins/analytics/plugin.json",
   "paths": [
@@ -17,7 +17,7 @@
     "apps/cli/src/plugins/index.ts"
   ],
   "requires": {
-    "kit": ">=0.6.0 <1.0.0",
+    "kit": ">=0.6.1 <1.0.0",
     "surfaces": [],
     "plugins": []
   },

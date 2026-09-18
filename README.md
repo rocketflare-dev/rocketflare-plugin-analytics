@@ -1,5 +1,22 @@
 # rocketflare-plugin-analytics
 
+> **Moved.** Analytics now lives in
+> [rocketflare-dev/rocketflare-plugins](https://github.com/rocketflare-dev/rocketflare-plugins)
+> under `plugins/analytics`, and is released from **2.0.0** onward — one repository holding the
+> first-party plugins, released in lockstep at one version.
+>
+> ```bash
+> pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugins.git@2.0.0 --subdir plugins/analytics
+> ```
+>
+> **An existing install cannot `pnpm plugin upgrade` across the move**, because `source.repo` is
+> recorded per surface: it is `pnpm plugin remove analytics --apply` then the command above.
+>
+> The `1.0.x` tags here stay resolvable and installable for anyone pinned to one, and nothing about
+> them changes. This repository is archived and will see no further releases. Everything below
+> describes 1.0.2 and is kept as it was.
+
+
 Dashboards, cubes, fact tables and the drizzle-cube API for a [Rocketflare](https://github.com/rocketflare-dev/rocketflare) app.
 
 **This is not an npm package.** A Rocketflare plugin is a git repository *copied into* your app —
